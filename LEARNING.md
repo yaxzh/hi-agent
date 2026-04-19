@@ -97,7 +97,34 @@
 
 ---
 
-## 阶段五：待学习
+## 阶段五：Pydantic AI 实战（已完成）
+
+### 5.1 框架迁移
+- [x] 用 Pydantic AI 重写 hi-agent（main_v2.py）
+- [x] 对比手写 vs 框架：代码量减少约 70%
+- [x] 连接智谱 GLM：OpenAIModel + OpenAIProvider + AsyncOpenAI
+
+### 5.2 Pydantic AI 核心模式
+- [x] `@agent.tool_plain` 装饰器替代 `registry.register()`
+- [x] `agent.run_sync()` / `agent.run()` 替代 while True 循环
+- [x] `message_history` 参数管理多轮对话
+- [x] `result_type=PydanticModel` 结构化输出
+- [x] `result.data` 返回 Pydantic model 实例
+- [x] `result.all_messages()` 获取完整消息历史
+
+### 5.3 手写 vs 框架对比
+
+| 手写 hi-agent | Pydantic AI |
+|---|---|
+| `while True` + tool_calls 判断 | `agent.run_sync()` |
+| `registry.register(name, schema, handler)` | `@agent.tool_plain` |
+| messages 模块级变量 | `message_history` 参数 |
+| 手动拼 tool message | 自动管理 |
+| 字符串输出 | 可选 Pydantic model 结构化输出 |
+
+---
+
+## 阶段六：待学习
 
 - [ ] Pydantic AI 实战（用 Pydantic AI 重写 hi-agent）
 - [ ] 流式输出（stream=True）
