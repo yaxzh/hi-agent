@@ -1,8 +1,7 @@
+import asyncio
 import os
 
-from cohere.manually_maintained.cohere_aws import mode
 from dotenv import load_dotenv
-from mistralai.extra.run import result
 from openai import AsyncOpenAI
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
@@ -26,7 +25,9 @@ class WeatherAnswer(BaseModel):
 # 创建 Agent
 agent = Agent(
     model=model,
-    system_prompt=skills_tool.build_skill_prompt())
+    system_prompt=skills_tool.build_skill_prompt(),
+    retries=3
+)
 
 # 注册工具
 @agent.tool_plain
@@ -44,8 +45,7 @@ def skill_view(name: str) -> str:
     """查看指定技能的详细内容"""
     return skills_tool.skill_view(name)
 
-if __name__ == '__main__':
-    print("hi-agent v2 (Pydantic AI)已经启动，输入q退出")
+async def main():
     history = []
     while True:
         user_input = input("你： ").strip()
@@ -53,7 +53,14 @@ if __name__ == '__main__':
             continue
         if user_input in ("q", "quit"):
             break
-        result = agent.run_sync(user_input, message_history=history)
-        history = result.all_messages()
-        print(f"Agent: {result.output}\n")
+        async with agent.run_stream(user_input, message_history=history) as stream:
+            print(f"Agent: ", end="")
+            async for chunk in stream.stream_output():
+                print(chunk, end="", flush=True)
+            print()
+            history = stream.all_messages()
+
+if __name__ == '__main__':
+    print("hi-agent v2 (Pydantic AI)已经启动，输入q退出")
+    asyncio.run(main())
 

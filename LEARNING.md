@@ -109,8 +109,14 @@
 - [x] `agent.run_sync()` / `agent.run()` 替代 while True 循环
 - [x] `message_history` 参数管理多轮对话
 - [x] `result_type=PydanticModel` 结构化输出
-- [x] `result.data` 返回 Pydantic model 实例
-- [x] `result.all_messages()` 获取完整消息历史
+- [x] `result.output` 返回结果（v1.84+）
+- [x] `result.all_messages()` / `stream.all_messages()` 获取完整消息历史
+
+### 5.3 流式输出与错误重试
+- [x] `agent.run_stream()` 流式输出
+- [x] `stream.stream_output(delta=True)` 逐字输出（注意：不能用 stream_text，会跳过工具调用）
+- [x] `Agent(retries=3)` LLM 输出无效时重试
+- [x] `AsyncOpenAI(max_retries=3, timeout=...)` API 层重试
 
 ### 5.3 手写 vs 框架对比
 
@@ -128,7 +134,7 @@
 
 - [ ] Pydantic AI 实战（用 Pydantic AI 重写 hi-agent）
 - [ ] 流式输出（stream=True）
-- [ ] 错误重试策略
+- [x] 错误重试策略
 - [ ] 上下文压缩（对话太长时截断/摘要）
 - [ ] 结构化输出（response_format + Pydantic model）
 - [ ] CrewAI 多 agent 协作实战
@@ -147,3 +153,4 @@
 | handler(args) 参数没解包 | 传了整个 dict 而非关键字参数 | 改为 handler(**args) |
 | run_script 没被 LLM 调用 | skill_view 没返回 scripts 列表 | skill_view 增加 scripts 字段 |
 | IDE 类型警告 list[dict] | OpenAI SDK 要求具体 MessageParam 类型 | 加 list[dict] 类型注解 |
+| stream_text() 不调工具 | Pydantic AI 的 stream_text 拿到首个文本就结束 | 改用 stream_output() |
