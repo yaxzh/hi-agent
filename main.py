@@ -46,21 +46,25 @@ registry.register(
 #     },
 #     handler=calculate,
 # )
+messages = [
+    {"role": "system", "content": skills_tool.build_skill_prompt()},
+]
 
 def agent(user_input):
-    messages = [
-        {"role": "system", "content": skills_tool.build_skill_prompt()},
-        {"role": "user", "content": user_input}]
+    messages.append(
+        {"role": "user", "content": user_input})
     while True:
         resp = client.chat.completions.create(
             model="glm-4.7",
             messages=messages,
             tools=registry.get_schema("all")
         )
+        print(
+            f"[Token] 输入: {resp.usage.prompt_tokens}, 输出: {resp.usage.completion_tokens}, 总计: {resp.usage.total_tokens}")
         msg = resp.choices[0].message
         messages.append(msg)
         if not msg.tool_calls:
-            return msg.content
+            return msg
         for tc in msg.tool_calls:
             print(tc.function)
             result = registry.dispatch(tc.function.name, json.loads(tc.function.arguments))
@@ -69,4 +73,11 @@ def agent(user_input):
 if __name__ == '__main__':
     # print(agent("深圳的天气怎么样?"))
     # print(agent("你有什么技能"))
-    print(agent("帮我算15*23"))
+    while True:
+        user_input = input("你: ").strip()
+        if not user_input:
+            continue
+        if user_input in ("q", "quit"):
+            break
+        answer = agent(user_input)
+        print(f"{answer.role}: {answer.content}")
